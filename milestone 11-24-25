@@ -1,0 +1,67 @@
+#include <Servo.h>
+
+const int RightMotorA = 3;
+const int RightMotorB = 5;
+const int LeftMotorA  = 6;
+const int LeftMotorB  = 11;
+
+const int trigPin = 9;
+const int echoPin = 10;
+
+Servo Servo1;
+const int servoPin = 2;
+
+void setup() {
+  Serial.begin(9600);
+  
+  pinMode(RightMotorA, OUTPUT);
+  pinMode(RightMotorB, OUTPUT);
+  pinMode(LeftMotorA, OUTPUT);
+  pinMode(LeftMotorB, OUTPUT);
+  
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
+  Servo1.attach(servoPin);
+
+int readUltrasonic() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 25000);
+  int distance = duration * 0.0343 / 2;
+
+  return distance;
+}
+
+void react(int distance) {
+  for (int pos = 0; pos <= 180; pos++) {
+    Servo1.write(pos);
+    delay(10);  // speed control
+  }
+
+  // Sweep from 180° back to 0°
+  for (int pos = 180; pos >= 0; pos--) {
+    Servo1.write(pos);
+    delay(10);
+  }
+  if (distance < 20) {
+    // TURN
+    analogWrite(RightMotorA, 185);
+    analogWrite(RightMotorB, 0);
+    analogWrite(LeftMotorA, 0);
+    analogWrite(LeftMotorB, 160);
+    delay(300);
+  } else {
+    // FORWARD
+    analogWrite(RightMotorA, 185);
+    analogWrite(RightMotorB, 0);
+    analogWrite(LeftMotorA, 160);
+    analogWrite(LeftMotorB, 0);
+    delay(100);
+  }
+}
